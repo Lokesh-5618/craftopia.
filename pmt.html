@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Payment Gateway</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .payment-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 340px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      background: #e0e0e0;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .tab.active {
+      background: #8b7355;
+      color: white;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #6b4f37;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5a3f2e;
+    }
+
+    #status {
+      margin-top: 10px;
+      text-align: center;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-container">
+    <h2>Payment Gateway</h2>
+    <p>Total Amount to Pay: ₹<span id="pay-amount">0</span></p>
+
+    <div class="tabs">
+      <div class="tab active" id="card-tab">Card</div>
+      <div class="tab" id="upi-tab">UPI</div>
+    </div>
+
+    <!-- Card Payment Form -->
+    <form id="card-form" class="form-section active">
+      <label for="cardholder">Cardholder Name</label>
+      <input type="text" id="cardholder" required>
+
+      <label for="cardnumber">Card Number</label>
+      <input type="text" id="cardnumber" maxlength="16" required>
+
+      <label for="expiry">Expiry Date (MM/YY)</label>
+      <input type="text" id="expiry" maxlength="5" required>
+
+      <label for="cvv">CVV</label>
+      <input type="password" id="cvv" maxlength="4" required>
+
+      <button type="submit">Pay ₹0</button>
+    </form>
+
+    <!-- UPI Payment Form -->
+    <form id="upi-form" class="form-section">
+      <label for="upiid">UPI ID</label>
+      <input type="text" id="upiid" placeholder="example@upi" required>
+      <button type="submit">Pay ₹0</button>
+    </form>
+
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const cardTab = document.getElementById("card-tab");
+    const upiTab = document.getElementById("upi-tab");
+    const cardForm = document.getElementById("card-form");
+    const upiForm = document.getElementById("upi-form");
+    const status = document.getElementById("status");
+
+    // Tab switching logic
+    cardTab.addEventListener("click", () => {
+      cardTab.classList.add("active");
+      upiTab.classList.remove("active");
+      cardForm.classList.add("active");
+      upiForm.classList.remove("active");
+      status.textContent = "";
+    });
+
+    upiTab.addEventListener("click", () => {
+      upiTab.classList.add("active");
+      cardTab.classList.remove("active");
+      upiForm.classList.add("active");
+      cardForm.classList.remove("active");
+      status.textContent = "";
+    });
+
+    // Card form submit
+    cardForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      status.textContent = "Processing card payment...";
+      setTimeout(() => {
+        status.textContent = "✅ Card payment successful!";
+        localStorage.removeItem("cart");
+        localStorage.removeItem("totalAmount");
+      }, 1500);
+    });
+
+    // UPI form submit
+    upiForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const upiId = document.getElementById("upiid").value.trim();
+      if (!upiId.includes("@")) {
+        status.textContent = "❌ Invalid UPI ID.";
+        return;
+      }
+      status.textContent = "Processing UPI payment...";
+      setTimeout(() => {
+        status.textContent = "✅ UPI payment successful!";
+        localStorage.removeItem("cart");
+        localStorage.removeItem("totalAmount");
+      }, 1500);
+    });
+
+    // Load total amount and update buttons
+    document.addEventListener("DOMContentLoaded", () => {
+      const amount = localStorage.getItem("totalAmount") || "0";
+      document.getElementById("pay-amount").textContent = amount;
+      document.querySelector("#card-form button").textContent = `Pay ₹${amount}`;
+      document.querySelector("#upi-form button").textContent = `Pay ₹${amount}`;
+    });
+  </script>
+</body>
+</html>
